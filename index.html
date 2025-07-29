@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="invoice-container">
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="header text-center mb-4">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo Triska Kencana" class="logo img-fluid">
+        <h1 class="mt-3">INVOICE TRISKA KENCANA</h1>
+    </div>
+
+    <!-- --- PERUBAHAN UTAMA DI SINI --- -->
+    <!-- Tambahkan target="_blank" agar PDF terbuka di tab baru -->
+    <form method="POST" action="/" target="_blank">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Informasi Pelanggan</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label for="tanggal" class="form-label">Tanggal</label>
+                        <input type="date" class="form-control" id="tanggal" name="tanggal" value="{{ today }}" required>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label for="nama" class="form-label">Nama</label>
+                        <input type="text" class="form-control" id="nama" name="nama" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="alamat" class="form-label">Alamat</label>
+                        <input type="text" class="form-control" id="alamat" name="alamat" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="telp" class="form-label">No. Telp</label>
+                        <input type="text" class="form-control" id="telp" name="telp" required>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Daftar Barang</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-5">
+                        <label for="item" class="form-label">Barang</label>
+                        <!-- Hapus 'required' jika Anda ingin mengandalkan validasi JS/Flask sepenuhnya -->
+                        <!-- Atau pastikan Anda selalu memilih item sebelum submit jika 'required' tetap ada -->
+                        <select class="form-select" id="item">
+                            <option value="">-- Pilih Barang --</option>
+                            {% for item, price in default_prices.items() %}
+                            <option value="{{ item }}" data-price="{{ price }}">{{ item }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="quantity" class="form-label">Jumlah</label>
+                        <input type="number" class="form-control" id="quantity" min="1" value="1">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="price" class="form-label">Harga (Rp)</label>
+                        <input type="number" class="form-control" id="price" min="0">
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="button" class="btn btn-success w-100" id="addItem">Tambah</button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover" id="itemsTable">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>No</th>
+                                <th>Nama Barang</th>
+                                <th>Jumlah</th>
+                                <th>Harga</th>
+                                <th>Total</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="itemsList">
+                            <!-- Items will be added here dynamically -->
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="4" class="text-end fw-bold">TOTAL</td>
+                                <td id="grandTotal" class="fw-bold">Rp 0</td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-end">
+            <button type="submit" class="btn btn-primary btn-lg">Generate PDF Invoice</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
